@@ -6,11 +6,20 @@
 # MIT license 
 
 from entropy import compute_entropy
-from mindwave_mobile import ThinkGearProtocol, ThinkGearRawWaveData
+from mindwave_mobile import ThinkGearProtocol, ThinkGearRawWaveData, ThinkGearEEGPowerData
 import json
 from socketIO_client import SocketIO
 
+
 username = 'ffff'
+
+
+def ship_biodata(socket, data_type, payload):
+    socket.emit('biodata',
+        json.dumps({'username':username,
+            'data_type':data_type, 
+            'payload':payload}))
+
 
 def main():
 
@@ -24,20 +33,20 @@ def main():
 
         for d in pkt:
 
-            # compute entropy
             if isinstance(d, ThinkGearRawWaveData): 
+ 
                 raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
-                if len(raw_log) > 512:
+
+                # compute and ship entropy when we have > 512 raw values
+                if len(raw_log) > 256:
                     entropy = compute_entropy(raw_log)
                     print entropy
-                    ship_data(socket,'entropy',entropy)
+                    ship_biodata(socket,'entropy',entropy)
                     raw_log = []
 
-def ship_data(socket, biodata_type, payload):
-    socket.emit('biodata',
-        json.dumps({'username':username,
-            'biodata_type':biodata_type, 
-            'payload':payload}))
+            if isinstance(d, ThinkGearEEGPowerData): 
+                    print d
+                    ship_biodata(socket,'eeg_power',str(d))
 
 if __name__ == '__main__':
     main()

@@ -215,7 +215,7 @@ class ThinkGearRawWaveData(ThinkGearData):
     _log = False
 
 
-EEGPowerData = namedtuple('EEGPowerData', 'delta theta lowalpha highalpha lowbeta highbeta lowgamma midgamma')
+#EEGPowerData = namedtuple('EEGPowerData', 'delta theta lowalpha highalpha lowbeta highbeta lowgamma midgamma')
 class ThinkGearEEGPowerData(ThinkGearData):
     '''Eight EEG band power values (0 to 16777215).
     
@@ -224,7 +224,7 @@ class ThinkGearEEGPowerData(ThinkGearData):
     '''
 
     code = 0x83
-    _strfmt = 'ASIC EEG Power: %(value)r'
-    _decode = staticmethod(lambda v: EEGPowerData(*struct.unpack('>8L', ''.join( '\x00'+v[o:o+3] for o in xrange(0, 24, 3)))))
+    _strfmt = '%(value)r'
+    _decode = staticmethod(lambda v: struct.unpack('>8L', ''.join( '\x00'+v[o:o+3] for o in xrange(0, 24, 3))))
 
 
