@@ -210,7 +210,7 @@ class ThinkGearRawWaveData(ThinkGearData):
     '''RAW Wave Value (-32768 to 32767)'''
     code = 0x80
     _strfmt = '%(value)s'
-    _decode = staticmethod(lambda v: float(struct.unpack('>h', v)[0]))
+    _decode = staticmethod(lambda v: struct.unpack('>h', v)[0])
     # There are lots of these, don't log them by default
     _log = False
 

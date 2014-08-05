@@ -1,31 +1,43 @@
+
+#
+#  indra client
+#
 # (c) 2014 ffff (http://cosmopol.is) 
 # MIT license 
 
 from entropy import compute_entropy
-import mindwave-mobile as mw
+from mindwave_mobile import ThinkGearProtocol, ThinkGearRawWaveData
+import json
+from socketIO_client import SocketIO
 
-# TODO: package a json with user id and payload (e.g., type:entropy)
+username = 'ffff'
 
 def main():
 
+    # connect to the server
+    socket = SocketIO('localhost', 3000)
+
     raw_log = []
-    ent = 0
     #logging.basicConfig(level=logging.DEBUG)
 
-    for pkt in mw.ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
+    for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
 
         for d in pkt:
 
             # compute entropy
-            if isinstance(d, mw.ThinkGearRawWaveData): 
-                raw_log.append(d)
+            if isinstance(d, ThinkGearRawWaveData): 
+                raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
                 if len(raw_log) > 512:
-                    ent = compute_entropy(raw_log)
-                    print ent # TODO: ship entropy value to server
+                    entropy = compute_entropy(raw_log)
+                    print entropy
+                    ship_data(socket,'entropy',entropy)
                     raw_log = []
 
-            # TODO: EEG_POWER business
-
+def ship_data(socket, biodata_type, payload):
+    socket.emit('biodata',
+        json.dumps({'username':username,
+            'biodata_type':biodata_type, 
+            'payload':payload}))
 
 if __name__ == '__main__':
     main()
