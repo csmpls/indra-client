@@ -12,6 +12,7 @@ from socketIO_client import SocketIO
 
 
 username = 'ffff'
+entropy_window = 1024
 
 
 def ship_biodata(socket, data_type, payload):
@@ -20,33 +21,46 @@ def ship_biodata(socket, data_type, payload):
             'data_type':data_type, 
             'payload':payload}))
 
+class Client():
 
-def main():
+    def __init__(self):
+        self.entropy_window = 1024
+        self.raw_log = []
 
-    # connect to the server
-    socket = SocketIO('localhost', 3000)
+    # here is where we configure environment variables based on the server's prefernece
+    def on_welcome(self, *args):
+        self.entropy_window = args[0][u'entropy_window']
 
-    raw_log = []
-    #logging.basicConfig(level=logging.DEBUG)
+    def run(self):
 
-    for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
+        # connect to the server
+        socket = SocketIO('http://indra.coolworld.me')
+        socket.on('welcome', self.on_welcome)
+        socket.wait(seconds=1)
+        print 'entropy window', self.entropy_window
 
-        for d in pkt:
+        #logging.basicConfig(level=logging.DEBUG)
+        for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
 
-            if isinstance(d, ThinkGearRawWaveData): 
- 
-                raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
+            for d in pkt:
 
-                # compute and ship entropy when we have > 512 raw values
-                if len(raw_log) > 256:
-                    entropy = compute_entropy(raw_log)
-                    print entropy
-                    ship_biodata(socket,'entropy',entropy)
-                    raw_log = []
+                if isinstance(d, ThinkGearRawWaveData): 
+     
+                    self.raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
 
-            if isinstance(d, ThinkGearEEGPowerData): 
-                    print d
-                    ship_biodata(socket,'eeg_power',str(d))
+                    # compute and ship entropy when we have > 512 raw values
+                    if len(self.raw_log) > self.entropy_window:
+                        entropy = compute_entropy(self.raw_log)
+                        print entropy
+                        ship_biodata(socket,'entropy',entropy)
+                        self.raw_log = []
+
+                if isinstance(d, ThinkGearEEGPowerData): 
+                        # TODO: this cast is really embarrassing
+                        reading = eval(str(d).replace('(','[').replace(')',']'))
+                        print reading
+                        ship_biodata(socket,'eeg_power',reading)
 
 if __name__ == '__main__':
-    main()
+   client = Client()
+   client.run() 
