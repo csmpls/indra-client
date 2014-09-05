@@ -31,6 +31,9 @@ class Client():
     def on_welcome(self, *args):
         self.entropy_window = args[0][u'entropy_window']
 
+    def on_disconnect(self):
+        print 'disconnected from server...'
+
     def run(self):
 
         # connect to the server
@@ -44,6 +47,8 @@ class Client():
 
             for d in pkt:
 
+        	socket.on('disconnect', self.on_disconnect)
+
                 if isinstance(d, ThinkGearRawWaveData): 
      
                     self.raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
@@ -52,14 +57,14 @@ class Client():
                     if len(self.raw_log) > self.entropy_window:
                         entropy = compute_entropy(self.raw_log)
                         print entropy
-                        ship_biodata(socket,'entropy',entropy)
+                        #ship_biodata(socket,'entropy',entropy)
                         self.raw_log = []
 
                 if isinstance(d, ThinkGearEEGPowerData): 
                         # TODO: this cast is really embarrassing
                         reading = eval(str(d).replace('(','[').replace(')',']'))
                         print reading
-                        ship_biodata(socket,'eeg_power',reading)
+                        #ship_biodata(socket,'eeg_power',reading)
 
 if __name__ == '__main__':
    client = Client()
