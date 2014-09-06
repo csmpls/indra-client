@@ -37,6 +37,9 @@ class Client():
     def on_disconnect(self):
         print 'disconnected from server...'
 
+    def on_clientlist(self, *args):
+        print 'clients connected', args
+
     def run(self):
 
         # connect to the server
@@ -45,8 +48,9 @@ class Client():
             # send username,get server data 
             print('connecting...')
             socket.emit('hello', username, self.on_hello_response)
-            socket.wait_for_callbacks(seconds=1)
             socket.on('disconnect', self.on_disconnect)
+            socket.on('clientlist', self.on_clientlist)
+            socket.wait_for_callbacks(seconds=1)
 
             # logging.basicConfig(level=logging.DEBUG)
             for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
