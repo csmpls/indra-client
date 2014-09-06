@@ -50,7 +50,7 @@ class Client():
             socket.on('disconnect', self.on_disconnect)
             #socket.wait(seconds=1)
 
-            logging.basicConfig(level=logging.DEBUG)
+            # logging.basicConfig(level=logging.DEBUG)
             for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
 
                 for d in pkt:
