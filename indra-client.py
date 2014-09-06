@@ -50,27 +50,27 @@ class Client():
             socket.on('disconnect', self.on_disconnect)
             #socket.wait(seconds=1)
 
-        #logging.basicConfig(level=logging.DEBUG)
-        # for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
+            logging.basicConfig(level=logging.DEBUG)
+            for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
 
-        #     for d in pkt:
+                for d in pkt:
 
-        #         if isinstance(d, ThinkGearRawWaveData): 
-     
-        #             self.raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
+                    if isinstance(d, ThinkGearRawWaveData): 
+         
+                        self.raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
 
-        #             # compute and ship entropy when we have > 512 raw values
-        #             if len(self.raw_log) > self.entropy_window:
-        #                 entropy = compute_entropy(self.raw_log)
-        #                 #print entropy
-        #                 #ship_biodata(socket,'entropy',entropy)
-        #                 self.raw_log = []
+                        # compute and ship entropy when we have > 512 raw values
+                        if len(self.raw_log) > self.entropy_window:
+                            entropy = compute_entropy(self.raw_log)
+                            #print entropy
+                            #ship_biodata(socket,'entropy',entropy)
+                            self.raw_log = []
 
-        #         if isinstance(d, ThinkGearEEGPowerData): 
-        #                 # TODO: this cast is really embarrassing
-        #                 reading = eval(str(d).replace('(','[').replace(')',']'))
-        #                 print reading
-        #                 #ship_biodata(socket,'eeg_power',reading)
+                    if isinstance(d, ThinkGearEEGPowerData): 
+                            # TODO: this cast is really embarrassing
+                            reading = eval(str(d).replace('(','[').replace(')',']'))
+                            print reading
+                            #ship_biodata(socket,'eeg_power',reading)
 
 if __name__ == '__main__':
    client = Client()
