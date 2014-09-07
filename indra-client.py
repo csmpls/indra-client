@@ -11,7 +11,7 @@ import json
 from socketIO_client import SocketIO
 
 
-username = 'ffff'
+username = ''
 entropy_window = 1024
 
 
@@ -38,12 +38,15 @@ class Client():
         print 'disconnected from server...'
 
     def on_clientlist(self, *args):
-        print 'clients connected', args
+        print 'clients connected:', args
 
     def run(self):
 
-        # connect to the server
+        # get username
+        username = raw_input('Enter a username: ')
+        raw_input('Pair your mindwave with your laptop. Just flip the switch on the side of the device.')
 
+        # connect to the server
         with SocketIO('http://indra.coolworld.me') as socket:
             # send username,get server data 
             print('connecting...')
