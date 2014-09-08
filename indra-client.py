@@ -44,7 +44,7 @@ class Client():
 
         # get username
         username = raw_input('Enter a username: ')
-        raw_input('Pair your mindwave with your laptop. Just flip the switch on the side of the device.')
+        raw_input('Pair your mindwave with your laptop. Just flip the switch on the side of the device. Press ENTER when it\'s paired.')
 
         # connect to the server
         with SocketIO('http://indra.coolworld.me') as socket:
