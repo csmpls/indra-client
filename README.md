@@ -19,5 +19,5 @@ indranet client
 
 ### Windows
 1. Follow steps 1-3 above.
-2. Change the line in `run` to `for pkt in ThinkGearProtocol('COM6').get_packets():` (thanks to  [https://github.com/jannah](hassan)
+2. Change the line in `run` to `for pkt in ThinkGearProtocol('COM6').get_packets():` (thanks to [hassan](https://github.com/jannah))
 3. Wear the headset and run `python indra-client.py`.
