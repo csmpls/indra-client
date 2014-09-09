@@ -19,6 +19,5 @@ indranet client
 
 ### Windows
 1. Follow steps 1-3 above.
-2. Follow the instructions [here](http://plugable.com/2011/07/04/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7) to find the COM port for the MindWave Mobile *(TODO: figure out what this COM port is on win? I don't have a win comp so I can't do this and others online seem to be on OS X/Linux as well)*
-3. Find the line containing `'/dev/tty.MindWaveMobile-DevA'` and change that bit to `'[com port you found]'`
-4. Wear the headset and run `python indra-client.py`.
+2. Change the line in `run` to `for pkt in ThinkGearProtocol('COM6').get_packets():` (thanks to  [https://github.com/jannah](hassan)
+3. Wear the headset and run `python indra-client.py`.
