@@ -7,75 +7,85 @@
 
 from entropy import compute_entropy
 from mindwave_mobile import ThinkGearProtocol, ThinkGearRawWaveData, ThinkGearEEGPowerData
-import json
-from socketIO_client import SocketIO
+import json, requests; from datetime import datetime, date
+import time
+import dateutil.parser; import dateutil.relativedelta
 
 
 username = ''
 entropy_window = 1024
 
 
-def ship_biodata(socket, data_type, payload):
-    socket.emit('biodata',
-        json.dumps({'username':username,
-            'data_type':data_type, 
-            'payload':payload}))
-
 class Client():
 
     def __init__(self):
+	self.username = None
         self.entropy_window = 1024
         self.raw_log = []
+	self.timediff = None
 
-    # here is where we configure environment variables based on the server's prefernece
-    def on_hello_response(self, *args):
-        # set our entropy window to whatever the server wants
-        #self.entropy_window = args[0][u'entropy_window']
-        self.entropy_window = args[0]
-        print 'server says entropy window', self.entropy_window
+    # calculates the diff between our local time and the server's time
+    def set_timediff(self, server_time_string):
+        server_time = dateutil.parser.parse(server_time_string).replace(tzinfo=None)
+	now = datetime.utcnow().replace(tzinfo=None)
+	self.timediff = dateutil.relativedelta.relativedelta(now,server_time)
 
-    def on_disconnect(self):
-        print 'disconnected from server...'
+    def get_server_time(self):
+        return datetime.utcnow().replace(tzinfo=None) + self.timediff
 
-    def on_clientlist(self, *args):
-        print 'clients connected:', args
+    def ship_biodata(self, data_type, payload):
+        # handler for the date
+        dthandler = lambda obj: (
+            obj.isoformat()
+            if isinstance(obj, datetime)
+            or isinstance(obj, date)
+            else None)
+	# construct json
+        j = json.dumps({'username':self.username,
+       	   'time':self.get_server_time(),
+           'data_type':data_type, 
+           'payload':payload}, default=dthandler)
+	# post json
+	r = requests.post(
+		'http://indra.coolworld.me',
+		data=j,
+		headers={'content-type': 'application/json'}
+	)
 
     def run(self):
 
         # get username
-        username = raw_input('Enter a username: ')
+        self.username = raw_input('Enter a username: ')
         raw_input('Pair your mindwave with your laptop. Just flip the switch on the side of the device. Press ENTER when it\'s paired.')
 
-        # connect to the server
-        with SocketIO('http://indra.coolworld.me') as socket:
-            # send username,get server data 
-            print('connecting...')
-            socket.emit('hello', username, self.on_hello_response)
-            socket.on('disconnect', self.on_disconnect)
-            socket.on('clientlist', self.on_clientlist)
-            socket.wait_for_callbacks(seconds=1)
+	print '\nconnecting...',
+	# set the timediff before doing anything
+	self.set_timediff(
+		requests.get('http://indra.coolworld.me').json()['time']
+	)
+	print('connected! starting to read mindwave data....') 
 
-            # logging.basicConfig(level=logging.DEBUG)
-            for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
 
-                for d in pkt:
+        for pkt in ThinkGearProtocol('/dev/tty.MindWaveMobile-DevA').get_packets():
 
-                    if isinstance(d, ThinkGearRawWaveData): 
-         
-                        self.raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
+            for d in pkt:
 
-                        # compute and ship entropy when we have > 512 raw values
-                        if len(self.raw_log) > self.entropy_window:
-                            entropy = compute_entropy(self.raw_log)
-                            #print entropy
-                            #ship_biodata(socket,'entropy',entropy)
-                            self.raw_log = []
+                if isinstance(d, ThinkGearRawWaveData): 
+     
+                    self.raw_log.append(float(str(d))) #how/can/should we cast this data beforehand?
 
-                    if isinstance(d, ThinkGearEEGPowerData): 
-                            # TODO: this cast is really embarrassing
-                            reading = eval(str(d).replace('(','[').replace(')',']'))
-                            print reading
-                            #ship_biodata(socket,'eeg_power',reading)
+                    # compute and ship entropy when we have > 512 raw values
+                    if len(self.raw_log) > self.entropy_window:
+                        entropy = compute_entropy(self.raw_log)
+                        #print entropy
+                        #ship_biodata('entropy',entropy)
+                        self.raw_log = []
+
+                if isinstance(d, ThinkGearEEGPowerData): 
+                        # TODO: this cast is really embarrassing
+                        reading = eval(str(d).replace('(','[').replace(')',']'))
+                        print reading
+                        self.ship_biodata('eeg_power',reading)
 
 if __name__ == '__main__':
    client = Client()
