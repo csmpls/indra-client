@@ -17,6 +17,8 @@ entropy_window = 1024
 linux_port = '/dev/tty.MindWaveMobile-DevA'
 windows_port = '5'
 use_port = linux_port
+output_file = ''
+print_output = False
 
 class Client():
 
@@ -69,7 +71,8 @@ class Client():
             requests.get('http://indra.coolworld.me').json()['time']
         )
         print('connected! starting to read mindwave data....') 
-
+        if print_output:
+            output_file_writer = open(output_file, 'w')
 
         for pkt in ThinkGearProtocol(use_port).get_packets():
 
@@ -88,9 +91,17 @@ class Client():
                 if isinstance(d, ThinkGearEEGPowerData): 
                     # TODO: this cast is really embarrassing
                     reading = eval(str(d).replace('(','[').replace(')',']'))
-                    print reading
+                    reading2 = '"%s": %s'%(datetime.utcnow().replace(tzinfo=None), reading)
+                    print reading2
+                    if print_output:
+                        output_file_writer.write(str(reading2)+'\n')
+                        output_file_writer.flush()
                     self.ship_biodata('eeg_power',reading)
 
 if __name__ == '__main__':
-   client = Client()
-   client.run() 
+    if len(sys.argv)>1:
+        output_file = sys.argv[1]
+        print_output = True
+        print 'printing output to %s' % output_file
+    client = Client()
+    client.run() 
