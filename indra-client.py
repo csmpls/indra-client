@@ -12,12 +12,6 @@ import time
 import dateutil.parser; import dateutil.relativedelta
 import sys, platform
 
-username = ''
-entropy_window = 1024
-linux_port = '/dev/tty.MindWaveMobile-DevA'
-windows_port = '5'
-use_port = linux_port
-
 class Client():
 
     def __init__(self):
@@ -25,6 +19,7 @@ class Client():
         self.entropy_window = 1024
         self.raw_log = []
         self.timediff = None
+	self.port = '/dev/tty.MindWaveMobile-DevA'
 
     # calculates the diff between our local time and the server's time
     def set_timediff(self, server_time_string):
@@ -58,9 +53,13 @@ class Client():
 
         # get username
         self.username = raw_input('Enter a username: ')
+	
+	# get port
         if 'Windows' in platform.system():
-            port_number = raw_input('Windows OS detected. Please select proper COM part number (default is %s):'%windows_port)
-            use_port= "COM%s"%port_number if len(port_number)>0 else "COM%s"%windows_port
+            port_number = raw_input('Windows OS detected. Please select proper COM part number:')
+            port= "COM%s"%port_number if len(port_number)>0 else "COM%5"
+
+	# prompt user to pair mindwave
         raw_input('Pair your mindwave with your laptop. Just flip the switch on the side of the device. Press ENTER when it\'s paired.')
 
         print '\nconnecting...',
@@ -71,7 +70,7 @@ class Client():
         print('connected! starting to read mindwave data....') 
 
 
-        for pkt in ThinkGearProtocol(use_port).get_packets():
+        for pkt in ThinkGearProtocol(self.port).get_packets():
 
             for d in pkt:
 
