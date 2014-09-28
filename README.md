@@ -20,4 +20,4 @@ indranet client
 1. Follow steps 1 & 2 above.
 2. Go to “Devices and Printers”. Right-click on the MindWave device icon and selected “Properties”. In this dialog there is a tab “Hardware” under which the port name of your MindWave is displayed.
 3. Wear the headset and run `python indra-client.py`.
-4. When prompted, enter the COM Port number (e.g. 5)
+4. When prompted, enter the port number (e.g. 5)
