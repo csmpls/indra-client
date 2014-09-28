@@ -181,7 +181,7 @@ class ThinkGearUnknownData(ThinkGearData):
 class ThinkGearPoorSignalData(ThinkGearData):
     '''POOR_SIGNAL Quality (0-255)'''
     code = 0x02
-    _strfmt = 'POOR SIGNAL: %(value)s'
+    _strfmt = '%(value)s'
     _decode = staticmethod(ord)
 
 
