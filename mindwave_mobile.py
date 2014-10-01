@@ -181,7 +181,7 @@ class ThinkGearUnknownData(ThinkGearData):
 class ThinkGearPoorSignalData(ThinkGearData):
     '''POOR_SIGNAL Quality (0-255)'''
     code = 0x02
-    _strfmt = 'POOR SIGNAL: %(value)s'
+    _strfmt = '%(value)s'
     _decode = staticmethod(ord)
 
 
@@ -226,5 +226,4 @@ class ThinkGearEEGPowerData(ThinkGearData):
     code = 0x83
     _strfmt = '%(value)r'
     _decode = staticmethod(lambda v: struct.unpack('>8L', ''.join( '\x00'+v[o:o+3] for o in xrange(0, 24, 3))))
-
 

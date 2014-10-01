@@ -8,8 +8,7 @@ indranet client
 ### installing libraries
 
 0. make sure you've installed both python and [pip](https://pypi.python.org/pypi/pip)
-1. `pip install pyserial`
-2. `pip install socketIO_client`
+1. `sudo pip install pyserial requests python-dateutil`
 
 ### OSX / Linux
 
@@ -18,7 +17,7 @@ indranet client
 3. Wear the headset and run `python indra-client.py`.
 
 ### Windows
-1. Follow steps 1-3 above.
-2. Go to â€œDevices and Printersâ€. Right-click on the MindWave device icon and selected â€œPropertiesâ€. In this dialog there is a tab â€œHardwareâ€ under which the port name of your MindWave is displayed.
+1. Follow steps 1 & 2 above.
+2. Go to “Devices and Printers”. Right-click on the MindWave device icon and selected “Properties”. In this dialog there is a tab “Hardware” under which the port name of your MindWave is displayed.
 3. Wear the headset and run `python indra-client.py`.
-4. When prompted, enter the COM Port number (e.g. 5)
+4. When prompted, enter the port number (e.g. 5)
