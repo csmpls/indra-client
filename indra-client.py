@@ -10,12 +10,15 @@ from mindwave_mobile import ThinkGearProtocol, ThinkGearRawWaveData, ThinkGearEE
 import json, requests; from datetime import datetime, date
 import time
 import dateutil.parser; import dateutil.relativedelta
-import sys, platform
+import sys, platform, random
 
 class Client():
 
     def __init__(self):
         self.username = None
+        self.output_file_writer = None
+        self.print_to_console = True
+        self.print_output = False
         self.entropy_window = 1024
         self.raw_log = []
 	self.start_time = None
