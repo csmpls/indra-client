@@ -208,5 +208,5 @@ if __name__ == '__main__':
         print 'printing output to %s' % output_file
         
     client = Client()
-    client.run(output_file = output_file, run_offline=True ) 
+    client.run(output_file = output_file ) 
 
