@@ -227,4 +227,3 @@ class ThinkGearEEGPowerData(ThinkGearData):
     _strfmt = '%(value)r'
     _decode = staticmethod(lambda v: struct.unpack('>8L', ''.join( '\x00'+v[o:o+3] for o in xrange(0, 24, 3))))
 
-
