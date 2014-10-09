@@ -18,11 +18,11 @@ class Client():
         self.username = None
         self.entropy_window = 1024
         self.raw_log = []
-    self.start_time = None
-    self.end_time = None
-    self.signal_quality = 0
+        self.start_time = None
+        self.end_time = None
+        self.signal_quality = 0
         self.timediff = None
-    self.port = '/dev/tty.MindWaveMobile-DevA'
+        self.port = '/dev/tty.MindWaveMobile-DevA'
 
     # calculates the diff between our local time and the server's time
     def set_timediff(self, time_string):
@@ -62,12 +62,12 @@ class Client():
         # get username
         self.username = raw_input('Enter a username: ')
     
-    # get port
+        # get port
         if 'Windows' in platform.system():
             port_number = raw_input('Windows OS detected. Please select proper COM part number:')
             port= "COM%s"%port_number if len(port_number)>0 else "COM%5"
 
-    # prompt user to pair mindwave
+        # prompt user to pair mindwave
         raw_input('Pair your mindwave with your laptop. Just flip the switch on the side of the device. Press ENTER when it\'s paired.')
 
         print '\nconnecting to server...'
@@ -82,24 +82,24 @@ class Client():
 
             for d in pkt:
 
-        if isinstance(d, ThinkGearPoorSignalData):
-            self.signal_quality += int(str(d))
-            
+                if isinstance(d, ThinkGearPoorSignalData):
+                    self.signal_quality += int(str(d))
+                    
 
                 if isinstance(d, ThinkGearRawWaveData): 
 
-            #how/can/should we cast this data beforehand?
+                    #how/can/should we cast this data beforehand?
                     self.raw_log.append(float(str(d))) 
 
-            if len(self.raw_log) == 1:
-                self.start_time = self.get_server_time()
+                    if len(self.raw_log) == 1:
+                        self.start_time = self.get_server_time()
 
-            if len(self.raw_log) == self.entropy_window:
-                self.end_time = self.get_server_time()
+                    if len(self.raw_log) == self.entropy_window:
+                        self.end_time = self.get_server_time()
                         self.ship_biodata()
-                # reset variables
+                        # reset variables
                         self.raw_log = []
-                self.signal_quality = 0
+                        self.signal_quality = 0
 
 
 
