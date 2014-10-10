@@ -6,7 +6,7 @@
 # MIT license 
 
 from entropy import compute_entropy
-from mindwave_mobile import ThinkGearProtocol, ThinkGearRawWaveData, ThinkGearEEGPowerData, ThinkGearPoorSignalData
+from mindwave_mobile import ThinkGearProtocol, ThinkGearRawWaveData, ThinkGearEEGPowerData, ThinkGearPoorSignalData, ThinkGearAttentionData, ThinkGearMeditationData
 import json, requests; from datetime import datetime, date
 import time
 import dateutil.parser; import dateutil.relativedelta
@@ -14,13 +14,17 @@ import sys, platform
 
 class Client():
 
-    def __init__(self):
+    def __init__(self,server_url):
+        self.server_url = server_url[:-1] if server_url[-1] == '/' else server_url
         self.username = None
         self.entropy_window = 1024
         self.raw_log = []
+        self.attention_esense= None
+        self.meditation_esense= None 
+        self.eeg_power= None 
+        self.signal_quality = 0
         self.start_time = None
         self.end_time = None
-        self.signal_quality = 0
         self.timediff = None
         self.port = '/dev/tty.MindWaveMobile-DevA'
 
@@ -42,20 +46,24 @@ class Client():
             else None)
         # construct json
         j = json.dumps({'username':self.username,
-              'start_time':self.start_time,
-              'end_time':self.end_time,
-          'signal_quality':self.signal_quality,
-          'raw_values':self.raw_log}, 
+            'start_time':self.start_time,
+            'end_time':self.end_time,
+            'signal_quality':self.signal_quality,
+            'raw_values':self.raw_log, 
+            'attention_esense':self.attention_esense,
+            'meditation_esense':self.meditation_esense,
+            'eeg_power':self.eeg_power
+        }, 
     default=dthandler)
 
         # post json
         r = requests.post(
-            'http://indra.coolworld.me',
+            self.server_url,
             data=j,
             headers={'content-type': 'application/json'}
         )
 
-    print('.')
+        print(r)
 
     def run(self):
 
@@ -73,10 +81,9 @@ class Client():
         print '\nconnecting to server...'
         # set the timediff before doing anything
         self.set_timediff(
-            requests.get('http://indra.coolworld.me').json()['time']
+            requests.get(self.server_url + '/handshake').json()['time']
         )
-        print 'connected! when you see periods being printed, data is being shipped to the server. thanks for participating.'
-
+        print 'connected to server! servertarting communication with device....'
 
         for pkt in ThinkGearProtocol(self.port).get_packets():
 
@@ -85,15 +92,26 @@ class Client():
                 if isinstance(d, ThinkGearPoorSignalData):
                     self.signal_quality += int(str(d))
                     
+                if isinstance(d, ThinkGearAttentionData):
+                    self.attention_esense = int(str(d))
+
+                if isinstance(d, ThinkGearMeditationData):
+                    self.meditation_esense = int(str(d))
+
+                if isinstance(d, ThinkGearEEGPowerData):
+                    # this cast is both amazing and embarrassing
+                    self.eeg_power = eval(str(d).replace('(','[').replace(')',']'))
 
                 if isinstance(d, ThinkGearRawWaveData): 
-
-                    #how/can/should we cast this data beforehand?
+                    # record a reading
+                    # how/can/should we cast this data beforehand?
                     self.raw_log.append(float(str(d))) 
 
+                    # record start time as the first raw reading 
                     if len(self.raw_log) == 1:
                         self.start_time = self.get_server_time()
 
+                    # the data is all shipped here
                     if len(self.raw_log) == self.entropy_window:
                         self.end_time = self.get_server_time()
                         self.ship_biodata()
@@ -102,7 +120,6 @@ class Client():
                         self.signal_quality = 0
 
 
-
 if __name__ == '__main__':
-   client = Client()
+   client = Client('http://eegviz.coolworld.me')
    client.run() 
