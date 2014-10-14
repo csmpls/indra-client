@@ -73,7 +73,9 @@ class Client():
         # get port
         if 'Windows' in platform.system():
             port_number = raw_input('Windows OS detected. Please select proper COM part number:')
-            port= "COM%s"%port_number if len(port_number)>0 else "COM%5"
+            self.port= "COM%s"%port_number if len(port_number)>0 else "COM5"
+        
+        print('Using port: %s'%self.port)
 
         # prompt user to pair mindwave
         raw_input('Pair your mindwave with your laptop. Just flip the switch on the side of the device. Press ENTER when it\'s paired.')
