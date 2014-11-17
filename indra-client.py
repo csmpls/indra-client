@@ -17,7 +17,7 @@ class Client():
     def __init__(self,server_url):
         self.server_url = server_url[:-1] if server_url[-1] == '/' else server_url
         self.username = None
-        self.entropy_window = 1024
+        self.entropy_window = 512
         self.raw_log = []
         self.attention_esense= None
         self.meditation_esense= None 
@@ -63,7 +63,7 @@ class Client():
             headers={'content-type': 'application/json'}
         )
 
-        print(r)
+        print(self.get_server_time())
 
     def run(self):
 
